@@ -1,226 +1,173 @@
-# 🧠 Deep Learning Lab 3: Arabic NLP & Text Generation 🚀
+🧠 Deep Learning Lab 3: Arabic NLP & Text Generation 🚀
 
-![Deep Learning](https://img.shields.io/badge/Deep_Learning-NLP-blue)
-![PyTorch](https://img.shields.io/badge/PyTorch-1.10+-orange)
-![Transformers](https://img.shields.io/badge/Transformers-4.20+-green)
-![GPU](https://img.shields.io/badge/GPU-Enabled-brightgreen)
-![Arabic NLP](https://img.shields.io/badge/Arabic-NLP-yellow)
+📚 Table of Contents
 
-## 📚 Table of Contents
-- [Overview](#-overview)
-- [Project Structure](#-project-structure)
-- [Installation](#-installation)
-- [Data Collection & Preprocessing](#-data-collection--preprocessing)
-- [Classification Models](#-classification-models)
-- [Transformer Text Generation](#-transformer-text-generation)
-- [Evaluation Metrics](#-evaluation-metrics)
-- [Results & Analysis](#-results--analysis)
-- [Key Learnings](#-key-learnings)
-- [Future Improvements](#-future-improvements)
-- [References](#-references)
+Overview
+Project Structure
+Installation
+Data Collection & Preprocessing
+Classification Models
+Transformer Text Generation
+Evaluation Metrics
+Results & Analysis
+Key Learnings
+Future Improvements
+References
 
-## 🔍 Overview
-This project implements advanced deep learning architectures for Natural Language Processing tasks focusing on the Arabic language. It consists of two main components:
+🔍 Overview
+This project focuses on Natural Language Processing (NLP) tasks for the Arabic language, implemented in Google Colab with GPU support. It consists of two main parts:
 
-1. **Arabic Text Classification**: Building and comparing various recurrent neural network architectures (RNN, Bidirectional RNN, GRU, and LSTM) to classify Arabic texts based on their relevance scores.
-   
-2. **Arabic Text Generation**: Fine-tuning a GPT-2 model to generate coherent Arabic text continuations from given prompts.
+Arabic Text Classification: We collect Arabic texts from news websites, preprocess them, and train various recurrent neural network models (Simple RNN, Bidirectional RNN, LSTM, GRU) to predict relevance scores.
+Arabic Text Generation: We fine-tune a GPT-2 model on a small Arabic dataset to generate coherent text continuations from given prompts.
 
-This implementation is part of the Deep Learning course (Master MBD) supervised by Prof. ELAACHAk LOTFI at Université Abdelmalek Essaadi.
+This work is part of the Deep Learning course (Master MBD) supervised by Prof. ELAACHAk LOTFI.
 
-<p align="center">
-  <img src="https://miro.medium.com/max/1400/1*uCMelgC_N3Q8VzI_3QiQqQ.png" width="600" alt="NLP Deep Learning Architecture">
-</p>
 
-## 📂 Project Structure
-```
-deep-learning-lab3/
-├── notebooks/
-│   ├── part1_arabic_classification.ipynb
-│   └── part2_gpt2_finetuning.ipynb
-├── data/
-│   ├── raw/
-│   │   └── arabic_texts_raw.csv
-│   └── processed/
-│       └── arabic_texts_processed.csv
-├── models/
-│   ├── classification/
-│   │   ├── rnn_model.pth
-│   │   ├── birnn_model.pth
-│   │   ├── lstm_model.pth
-│   │   └── gru_model.pth
-│   └── generation/
-│       └── fine_tuned_gpt2/
-├── scripts/
-│   ├── scraping.py
-│   ├── preprocessing.py
-│   ├── train_models.py
-│   └── generate_text.py
-├── results/
-│   ├── model_comparison.csv
-│   ├── learning_curves.png
-│   └── generated_samples.txt
-├── requirements.txt
-├── README.md
-└── .gitignore
-```
 
-## 🛠 Installation
-To run this project, you need to install the required dependencies. You can do this by running:
+🛠 Installation
+Run the project in Google Colab with the following dependencies:
+!pip install torch transformers datasets scrapy beautifulsoup4 pyarabic farasapy pandas numpy matplotlib scikit-learn
 
-```bash
-pip install -r requirements.txt
-```
+💻 Setup Google Colab with GPU
 
-Or directly in Google Colab:
+Open the notebook in Google Colab.
+Go to Runtime → Change runtime type → Hardware accelerator → GPU.
+Verify GPU availability:import torch
+print(f"GPU available: {torch.cuda.is_available()}")
+print(f"GPU device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'None'}")
 
-```python
-!pip install torch transformers datasets scrapy beautifulsoup4 pyarabic farasapy matplotlib
-```
+Expected output: GPU available (Tesla T4).
 
-### 💻 Setup Google Colab with GPU
-1. Open [Google Colab](https://colab.research.google.com/)
-2. Create a new notebook
-3. Go to Runtime → Change runtime type → Hardware accelerator → GPU
-4. Verify GPU is available:
-   ```python
-   import torch
-   print(f"GPU available: {torch.cuda.is_available()}")
-   print(f"GPU device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'None'}")
-   ```
+📊 Data Collection & Preprocessing
+Web Scraping
+We scrape Arabic texts from news websites like Al Jazeera, BBC Arabic, and CNN Arabic using requests and BeautifulSoup. Each text is assigned a random relevance score (0-10) for classification.
+websites = [
+    "https://www.aljazeera.net/news/politics",
+    "https://www.bbc.com/arabic",
+    "https://arabic.cnn.com/"
+]
 
-## 📊 Data Collection & Preprocessing
 
-### Web Scraping
-Arabic text data is collected from various news websites and blogs using BeautifulSoup and Scrapy. Each text is assigned a relevance score between 0 and 10.
+Output: Saved as arabic_texts.csv with 20 texts for demonstration.
 
-```python
-# Web scraping with BeautifulSoup
-import requests
-from bs4 import BeautifulSoup
+Text Preprocessing Pipeline
+We preprocess the Arabic texts using the following steps:
 
-websites = ["https://www.aljazeera.net", "https://www.bbc.com/arabic", ...]
+Diacritics Removal: Using pyarabic to remove tashkeel (تشكيل).
+Non-Arabic Removal: Filter out non-Arabic characters.
+Tokenization: Split text into tokens with pyarabic.
+Stemming: Apply Farasa stemmer using farasapy.
+Stop Words Removal: Remove common Arabic stop words (e.g., من, في).
 
-# Extract Arabic text content
-# Score assignment
-```
+def preprocess_arabic_text(text):
+    text = araby.strip_tashkeel(text)
+    text = re.sub(r'[^\u0600-\u06FF\s]', ' ', text)
+    tokens = araby.tokenize(text)
+    stems = [stemmer.stem(token) for token in tokens]
+    filtered_stems = [token for token in stems if token not in arabic_stop_words]
+    return " ".join(filtered_stems)
 
-### Text Preprocessing Pipeline
-The collected Arabic texts undergo a comprehensive preprocessing pipeline:
-
-1. **Diacritics Removal**: Remove Arabic diacritical marks (تشكيل)
-2. **Tokenization**: Split text into individual tokens
-3. **Stemming**: Extract word stems using Farasa stemmer
-4. **Stop Words Removal**: Remove common Arabic stop words
-5. **Normalization**: Standardize text (e.g., normalize various forms of Alif)
-
-<p align="center">
-  <img src="https://miro.medium.com/max/1400/1*Zdxav15O9xVh7GQNaf5FJQ.png" width="650" alt="NLP Preprocessing Pipeline">
-</p>
-
-## 🧮 Classification Models
-We implement four different sequence model architectures for the classification task:
-
-### 1. Simple RNN
-```python
+🧮 Classification Models
+We implement four recurrent neural network models to predict relevance scores for Arabic texts:
+1. Simple RNN
+Basic RNN architecture with an embedding layer, RNN layer, and a linear output layer.
+2. Bidirectional RNN
+Processes text in both directions to capture context from past and future tokens.
+3. LSTM (Long Short-Term Memory)
+Uses memory cells and gates to handle long-range dependencies.
+4. GRU (Gated Recurrent Unit)
+A lighter alternative to LSTM with update and reset gates.
+# Example: Simple RNN Model
 class SimpleRNNModel(nn.Module):
     def __init__(self, vocab_size, embedding_dim, hidden_dim, output_dim):
         super(SimpleRNNModel, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.rnn = nn.RNN(embedding_dim, hidden_dim, batch_first=True)
         self.fc = nn.Linear(hidden_dim, output_dim)
-        
+    
     def forward(self, text):
         embedded = self.embedding(text)
         output, hidden = self.rnn(embedded)
         return self.fc(hidden.squeeze(0))
-```
 
-### 2. Bidirectional RNN
-Processes text in both directions to capture context from past and future tokens.
 
-### 3. LSTM (Long Short-Term Memory)
-Addresses the vanishing gradient problem with memory cells and gating mechanisms.
+Training Setup:
+Vocabulary size: Based on preprocessed text corpus.
+Embedding dimension: 100.
+Hidden dimension: 128.
+Batch size: 16.
+Epochs: 10.
+Optimizer: Adam (learning rate 0.001).
+Loss: Mean Squared Error (MSE).
 
-### 4. GRU (Gated Recurrent Unit)
-A simplified variant of LSTM with fewer parameters but comparable performance.
 
-## 🤖 Transformer Text Generation
-The second part of the project focuses on fine-tuning a pre-trained GPT-2 model for Arabic text generation.
 
-### Model Architecture
-GPT-2 is a transformer-based language model with a decoder-only architecture:
+🤖 Transformer Text Generation
+We fine-tune a GPT-2 model for Arabic text generation using the transformers library.
+Fine-Tuning Process
 
-<p align="center">
-  <img src="https://miro.medium.com/max/1400/1*iJcUH1F0TmCQE9yCrJjvxg.png" width="500" alt="GPT-2 Architecture">
-</p>
+Create a small Arabic dataset (custom_dataset.txt) with sample sentences.
+Load pre-trained GPT-2 model and tokenizer.
+Fine-tune on the dataset for 3 epochs.
+Save the fine-tuned model to ./fine_tuned_gpt2.
 
-### Fine-tuning Process
-1. Load the pre-trained GPT-2 model
-2. Create a custom Arabic text dataset
-3. Fine-tune the model on this dataset
-4. Generate text based on input prompts
-
-```python
-# Example text generation function
+# Example Text Generation
 def generate_text(prompt, model, tokenizer, max_length=100):
     input_ids = tokenizer.encode(prompt, return_tensors="pt").to(device)
-    
-    output = model.generate(
-        input_ids,
-        max_length=max_length,
-        num_return_sequences=1,
-        do_sample=True,
-        top_p=0.95,
-        top_k=50,
-        temperature=0.7,
-    )
-    
-    generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
-    return generated_text
-```
+    output = model.generate(input_ids, max_length=max_length, do_sample=True, top_p=0.95, top_k=50)
+    return tokenizer.decode(output[0], skip_special_tokens=True)
 
-## 📏 Evaluation Metrics
+Sample Prompts
 
-### Classification Metrics
-- **Mean Squared Error (MSE)**: Measures the average squared difference between predicted and actual scores
-- **Mean Absolute Error (MAE)**: Measures the average absolute difference between predictions and actual values
-- **R² Score**: Indicates the proportion of variance in the dependent variable that's predictable from the independent variables
+"مرحبا بك في"
 
-### Text Generation Metrics
-- **BLEU Score**: Evaluates the quality of generated text by comparing with reference texts
-- **Perplexity**: Measures how well a probability model predicts a sample
-- **Human Evaluation**: Subjective assessment of fluency, coherence, and relevance
+"الذكاء الاصطناعي هو"
 
-## 📈 Results & Analysis
+"اللغة العربية لها"
 
-### Classification Models Comparison
+Output: Saved in sample_generated_texts.txt and text_generation_results.json.
 
-| Model | MSE | MAE | R² | Training Time |
-|-------|-----|-----|-----|--------------|
-| RNN   | 0.45| 0.52| 0.63| 3m 20s       |
-| BiRNN | 0.38| 0.47| 0.71| 4m 15s       |
-| LSTM  | 0.32| 0.43| 0.75| 5m 40s       |
-| GRU   | 0.34| 0.45| 0.73| 4m 50s       |
 
-<p align="center">
-  <img src="https://miro.medium.com/max/1400/1*U3Qa3gWrPfGAMMrJdsvj8Q.png" width="600" alt="Learning Curves">
-</p>
+📏 Evaluation Metrics
+Classification Metrics
 
-### Text Generation Examples
+Mean Squared Error (MSE): Measures prediction error on original score scale.
+Mean Absolute Error (MAE): Average absolute difference between predicted and actual scores.
+R² Score: Proportion of variance explained by the model.
 
-**Prompt**: "الذكاء الاصطناعي هو"
+Text Generation Evaluation
 
-**Generated**: "الذكاء الاصطناعي هو مجال من مجالات علوم الحاسوب الذي يركز على تطوير أنظمة قادرة على أداء مهام تتطلب عادة الذكاء البشري. يشمل ذلك التعلم والاستدلال وحل المشكلات واتخاذ القرارات والإدراك البصري وفهم اللغة الطبيعية."
+Qualitative Assessment: Evaluate generated text for fluency and coherence.
+Output Storage: Results saved as JSON and text files for review.
 
-**Prompt**: "اللغة العربية لها"
+📈 Results & Analysis
+Classification Models
 
-**Generated**: "اللغة العربية لها تاريخ غني وعريق يمتد لأكثر من 1500 عام. تتميز بثرائها اللغوي وتنوع مفرداتها وقواعدها النحوية المعقدة والدقيقة. وهي من اللغات السامية التي انتشرت في شبه الجزيرة العربية ثم توسعت مع انتشار الإسلام لتصبح لغة العلم والأدب والفلسفة خلال العصر الذهبي للحضارة الإسلامية."
+Models are trained and evaluated on the test set.
+Loss curves are plotted using matplotlib to compare training and test performance.
 
-## 🔑 Key Learnings
-- **Architecture Impact**: Bidirectional models consistently outperform unidirectional ones by capturing context from both directions.
-- **Memory Mechanisms**: LSTM and GRU models show superior performance in capturing long-range dependencies compared to simple RNNs.
-- **Arabic Language Challenges**: Arabic morphological complexity requires specialized preprocessing techniques.
-- **Transfer Learning**: Fine-tuning pre-trained transformers is highly effective even with limited training data.
-- **Hyperparameter Sensitivity**: Model performance varies significantly with different hyperparameter configurations.
+Text Generation Examples
+Prompt: "الذكاء الاصطناعي هو"Generated: (Results vary; see sample_generated_texts.txt for examples.)
+Prompt: "اللغة العربية لها"Generated: (Results vary; see sample_generated_texts.txt for examples.)
+🔑 Key Learnings
+
+Arabic NLP Challenges: Morphological complexity requires careful preprocessing (diacritics removal, stemming).
+Model Performance: LSTM and GRU outperform Simple RNN due to better handling of long-range dependencies.
+Fine-Tuning Transformers: GPT-2 fine-tuning is effective for Arabic text generation, even with a small dataset.
+GPU Utilization: Using Colab’s Tesla T4 GPU significantly speeds up training.
+
+🚀 Future Improvements
+
+Larger Dataset: Scrape more Arabic texts to improve model robustness.
+Advanced Preprocessing: Incorporate lemmatization and better stop word lists.
+Hyperparameter Tuning: Optimize learning rate, batch size, and model architecture.
+Enhanced Evaluation: Add BLEU and perplexity metrics for text generation.
+Arabic-Specific Models: Use pre-trained Arabic transformers like AraGPT2.
+
+📚 References
+
+PyTorch Documentation: pytorch.org
+Transformers Library: huggingface.co/transformers
+Farasa Stemmer: farasa.qcri.org
+PyArabic Documentation: pyarabic.readthedocs.io
 
