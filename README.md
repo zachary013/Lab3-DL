@@ -25,11 +25,6 @@ This project focuses on Natural Language Processing (NLP) tasks for the Arabic l
 1. **Arabic Text Classification**: We collect Arabic texts from news websites, preprocess them, and train various recurrent neural network models (Simple RNN, Bidirectional RNN, LSTM, GRU) to predict relevance scores.
 2. **Arabic Text Generation**: We fine-tune a GPT-2 model on a small Arabic dataset to generate coherent text continuations from given prompts.
 
-This work is part of the Deep Learning course (Master MBD) supervised by Prof. ELAACHAk LOTFI.
-
-<p align="center">
-  <img src="https://miro.medium.com/max/1400/1*uCMelgC_N3Q8VzI_3QiQqQ.png" width="600" alt="NLP Deep Learning Architecture">
-</p>
 
 
 ## 🛠 Installation
@@ -175,13 +170,6 @@ def generate_text(prompt, model, tokenizer, max_length=100):
 - **Model Performance**: LSTM and GRU outperform Simple RNN due to better handling of long-range dependencies.
 - **Fine-Tuning Transformers**: GPT-2 fine-tuning is effective for Arabic text generation, even with a small dataset.
 - **GPU Utilization**: Using Colab’s Tesla T4 GPU significantly speeds up training.
-
-## 🚀 Future Improvements
-- **Larger Dataset**: Scrape more Arabic texts to improve model robustness.
-- **Advanced Preprocessing**: Incorporate lemmatization and better stop word lists.
-- **Hyperparameter Tuning**: Optimize learning rate, batch size, and model architecture.
-- **Enhanced Evaluation**: Add BLEU and perplexity metrics for text generation.
-- **Arabic-Specific Models**: Use pre-trained Arabic transformers like AraGPT2.
 
 ## 📚 References
 - PyTorch Documentation: [pytorch.org](https://pytorch.org)
