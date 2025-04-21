@@ -8,7 +8,6 @@
 
 ## 📚 Table of Contents
 - [Overview](#-overview)
-- [Project Structure](#-project-structure)
 - [Installation](#-installation)
 - [Data Collection & Preprocessing](#-data-collection--preprocessing)
 - [Classification Models](#-classification-models)
@@ -16,7 +15,6 @@
 - [Evaluation Metrics](#-evaluation-metrics)
 - [Results & Analysis](#-results--analysis)
 - [Key Learnings](#-key-learnings)
-- [Future Improvements](#-future-improvements)
 - [References](#-references)
 
 ## 🔍 Overview
